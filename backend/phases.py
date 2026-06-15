@@ -256,6 +256,7 @@ async def run_mafia_deliberation(
     last_targets: dict[str, str] = {}   # mafia_id -> last target_id
     count = 0
     idx = 0
+    no_target_streak = 0    # 연속으로 표적이 안 잡힌 발언 수
 
     while count < max_speeches:
         if engine._stop_deliberation:
@@ -265,8 +266,15 @@ async def run_mafia_deliberation(
 
         speaker = mafias[idx % len(mafias)]
         idx += 1
-        # 실시간으로 컨텍스트 다시 빌드 (이 모드에선 서로 반응해야 함)
-        messages = build_night_messages(state, speaker, "mafia")
+        messages = build_night_messages(state, speaker, "mafia") + [
+            ChatMessage(
+                "user",
+                "[필수] 너의 발언 마지막 한 문장은 반드시 "
+                "'나는 ○○를 표적으로 지목한다.' 형식이어야 한다. "
+                "○○는 살아있는 시민(비-마피아) 한 명의 이름. "
+                "이 형식이 없으면 무효 발언이다."
+            )
+        ]
         text = await _stream_unit_speech(
             engine,
             channel_id="mafia",
@@ -281,8 +289,21 @@ async def run_mafia_deliberation(
             t = _extract_mafia_target(text, state, speaker.id)
             if t:
                 last_targets[speaker.id] = t.id
+                no_target_streak = 0
+            else:
+                no_target_streak += 1
+        else:
+            no_target_streak += 1
 
-        # 합의 확인: 모든 살아있는 마피아의 마지막 지목이 같은가
+        # 조기 종료: 마피아 수만큼 연속으로 표적 없음 → 진척 없음 판정
+        if no_target_streak >= max(2, len(mafias) * 2):
+            await engine.send(p.out_info(
+                f"{count}회 발언했지만 유효한 표적이 안 나옵니다. 토론 종료. "
+                "'마피아 표적 결정' 버튼으로 강제 투표 권장"
+            ))
+            return
+
+        # 합의 확인
         if len(last_targets) >= len(mafias):
             uniq = set(last_targets[m.id] for m in mafias if m.id in last_targets)
             if len(uniq) == 1:
