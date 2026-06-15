@@ -46,3 +46,4 @@ run.bat
 - [07. 낮 페이즈 + 투표](./docs/07_day_phase.md)
 - [09. 밤 페이즈](./docs/09_night_phase.md)
 - [06b. 프론트엔드](./docs/06b_frontend.md)
+- [📦 사용 모델 + pull 명령](./docs/MODELS.md)
