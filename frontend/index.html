@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>AI Mafia</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<!-- ============= 셋업 화면 ============= -->
+<section id="setup-view" class="view">
+    <h1>AI Mafia — 셋업</h1>
+
+    <div class="card">
+        <h2>역할 구성</h2>
+        <div class="role-grid">
+            <label>마피아 <input type="number" id="rc-mafia" value="2" min="0"></label>
+            <label>경찰 <input type="number" id="rc-police" value="1" min="0"></label>
+            <label>의사 <input type="number" id="rc-doctor" value="1" min="0"></label>
+            <label>영매 <input type="number" id="rc-medium" value="1" min="0"></label>
+            <label>시민 <input type="number" id="rc-citizen" value="2" min="0"></label>
+        </div>
+        <p class="total-line">총 인원: <span id="total-count">7</span>명</p>
+    </div>
+
+    <div class="card">
+        <h2>LLM 프로바이더</h2>
+        <div class="provider-row">
+            <label>제공자
+                <select id="provider">
+                    <option value="anthropic">Anthropic Claude</option>
+                    <option value="ollama" selected>Ollama (로컬)</option>
+                </select>
+            </label>
+            <label id="anthropic-model-label" hidden>Claude 모델
+                <input type="text" id="anthropic-model" value="claude-haiku-4-5-20251001">
+            </label>
+        </div>
+        <label id="api-key-label" class="full" hidden>Anthropic API 키 (sk-...)
+            <input type="password" id="anthropic-key" placeholder="sk-ant-...">
+        </label>
+        <p class="hint" id="provider-hint">Ollama 모드: 페르소나 슬롯에서 모델을 개별 선택합니다. Anthropic 키는 사용되지 않음.</p>
+        <input type="hidden" id="ollama-model" value="">
+    </div>
+
+    <div class="card">
+        <h2>공통 시스템 프롬프트 (선택)</h2>
+        <textarea id="sys-prompt" rows="4" placeholder="모든 유닛에게 공통으로 들어갈 지시문. 예: '여기는 19세기 런던의 빈민가다. 모두 영국식 말투로 대화한다. 잔혹한 묘사는 피한다.'"></textarea>
+    </div>
+
+    <div class="card">
+        <h2>유닛 슬롯</h2>
+        <p class="hint">각 슬롯에 모델 하나씩 배정. 모델의 고유 톤이 곧 캐릭터가 됩니다.</p>
+        <div id="slot-list" class="slot-list"></div>
+        <input type="hidden" id="theme" value="">
+    </div>
+
+    <button id="start-btn" class="primary">게임 시작</button>
+    <div id="setup-log" class="log"></div>
+</section>
+
+
+<!-- ============= 게임 화면 ============= -->
+<section id="game-view" class="view" hidden>
+
+    <!-- 상단 페이즈 바 -->
+    <header class="phase-bar">
+        <span id="phase-label">SETUP</span>
+        <span id="day-label">Day 0</span>
+        <span class="spacer"></span>
+        <button data-cmd="start_day">낮 시작</button>
+        <button data-cmd="start_voting">투표 시작</button>
+        <button data-cmd="ai_vote">AI 투표</button>
+        <button data-cmd="final_defense">최후의 변론</button>
+        <button data-cmd="approval_vote">찬반 투표</button>
+        <button data-cmd="start_night">밤 시작</button>
+        <button data-cmd="mafia_deliberate">마피아 합의 토론</button>
+        <button data-cmd="stop_deliberation" class="danger">토론 중단</button>
+        <button data-cmd="mafia_target_vote">마피아 표적 결정</button>
+        <button data-cmd="apply_night">밤 결과 적용</button>
+    </header>
+
+    <!-- 본문: 좌 채널탭/채팅 / 우 유닛 패널 -->
+    <div class="main-grid">
+
+        <!-- 채널 탭 + 채팅 -->
+        <div class="chat-column">
+            <div id="channel-tabs" class="tabs"></div>
+            <div id="chat-area" class="chat"></div>
+            <div class="composer">
+                <input type="text" id="gm-input" placeholder="GM 발언 (Enter로 전송)">
+                <button id="gm-send">보내기</button>
+            </div>
+        </div>
+
+        <!-- 유닛 패널 -->
+        <aside id="unit-panel" class="units"></aside>
+    </div>
+
+    <!-- 하단 투표 집계 -->
+    <footer id="tally-bar" class="tally"></footer>
+    <div id="game-log" class="log"></div>
+</section>
+
+<script src="/static/views.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

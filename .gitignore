@@ -1,0 +1,26 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.pytest_cache/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local state / logs
+*.log
+*.sqlite
+*.db
+
+# Anything secret
+.env
+.env.*
+!.env.example
+secrets/
